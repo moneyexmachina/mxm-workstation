@@ -29,3 +29,6 @@ bindkey -v
 
 # Local machine/user overrides
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
+
+# User-installed executables
+export PATH="$HOME/.local/bin:$PATH"

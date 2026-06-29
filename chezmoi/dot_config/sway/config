@@ -59,6 +59,4 @@ gaps inner 0
 gaps outer 0
 
 # Bar
-bar {
-    status_command waybar
-}
+exec waybar
