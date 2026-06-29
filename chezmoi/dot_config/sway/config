@@ -54,7 +54,8 @@ bindsym Ctrl+Alt+space floating toggle
 bindsym Ctrl+Alt+f fullscreen toggle
 
 # Appearance
-default_border pixel 2
+default_border none
+default_floating_border normal
 gaps inner 0
 gaps outer 0
 
