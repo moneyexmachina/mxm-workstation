@@ -1,11 +1,7 @@
 # MXM zsh interactive configuration
 # Managed by mxm-workstation via chezmoi.
-
-# Prompt
-if command -v starship >/dev/null 2>&1; then
-    eval "$(starship init zsh)"
-fi
-
+# User-installed executables
+export PATH="$HOME/.local/bin:$PATH"
 # History
 HISTSIZE=5000
 SAVEHIST=5000
@@ -30,5 +26,9 @@ bindkey -v
 # Local machine/user overrides
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
-# User-installed executables
-export PATH="$HOME/.local/bin:$PATH"
+# Prompt
+if command -v starship >/dev/null 2>&1; then
+    eval "$(starship init zsh)"
+fi
+
+
