@@ -1,0 +1,27 @@
+# MXM zsh interactive configuration
+# Managed by mxm-workstation via chezmoi.
+
+# Prompt
+if command -v starship >/dev/null 2>&1; then
+    eval "$(starship init zsh)"
+fi
+
+# History
+HISTSIZE=5000
+SAVEHIST=5000
+HISTFILE="$HOME/.zsh_history"
+
+# Defaults
+export EDITOR=nvim
+export TMUX_CONF="$HOME/.config/tmux/tmux.conf"
+
+# Aliases
+alias ll="ls -lah"
+alias tmux="tmux -f $TMUX_CONF"
+alias kimg="kitty +kitten icat"
+
+# Vi-style keybindings
+bindkey -v
+
+# Local machine/user overrides
+[ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"

@@ -1,0 +1,5 @@
+# MXM zsh login configuration
+# Managed by mxm-workstation via chezmoi.
+
+# User-installed executables
+export PATH="$HOME/.local/bin:$PATH"

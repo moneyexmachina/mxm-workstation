@@ -1,0 +1,3 @@
+.config/tmux-client-*.log
+.config/tmux-server-*.log
+

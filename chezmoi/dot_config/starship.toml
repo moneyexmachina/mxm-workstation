@@ -1,0 +1,45 @@
+palette = "mxm"
+
+add_newline = true
+
+[character]
+success_symbol = "[>](yellow)"
+error_symbol = "[x](red)"
+
+[directory]
+truncation_length = 3
+truncate_to_repo = false
+
+[git_branch]
+symbol = "git: "
+
+[python]
+symbol = "py: "
+
+[username]
+show_always = true
+format = "[$user]($style)@"
+
+[hostname]
+ssh_only = false
+format = "[$hostname]($style) "
+
+[palettes.mxm]
+black   = "#0D171D"
+red     = "#8D1714"
+green   = "#C8A97B"
+yellow  = "#E3C98A"
+blue    = "#3557A0"
+magenta = "#3557A0"
+cyan    = "#42565A"
+white   = "#AAB1A4"
+
+bg0             = "#0D171D"
+accent_blue     = "#3557A0"
+structural_blue = "#42565A"
+neutral         = "#AAB1A4"
+text_primary    = "#EFEFEF"
+ok              = "#C8A97B"
+warn            = "#FF5B3F"
+alert           = "#8D1714"
+info            = "#E3C98A"
