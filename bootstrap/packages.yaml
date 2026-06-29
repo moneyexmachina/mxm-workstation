@@ -1,0 +1,12 @@
+ubuntu:
+  - git
+  - curl
+  - tmux
+  - zsh
+  - neovim
+  - ripgrep
+  - fd-find
+  - luarocks
+  - lua5.1
+  - nodejs
+  - npm

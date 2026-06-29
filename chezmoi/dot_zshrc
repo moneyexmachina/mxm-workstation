@@ -19,7 +19,11 @@ export TMUX_CONF="$HOME/.config/tmux/tmux.conf"
 alias ll="ls -lah"
 alias tmux="tmux -f $TMUX_CONF"
 alias kimg="kitty +kitten icat"
-
+# Ubuntu names the binary 'fdfind' to avoid a package clash.
+# Provide the canonical command expected by modern tooling.
+if command -v fdfind >/dev/null 2>&1; then
+    alias fd='fdfind'
+fi
 # Vi-style keybindings
 bindkey -v
 
