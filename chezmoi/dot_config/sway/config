@@ -1,0 +1,64 @@
+# MXM Sway Configuration
+# Managed by mxm-workstation via chezmoi.
+
+set $term kitty
+set $menu wofi --show drun
+
+font pango:FiraCode Nerd Font 10
+
+# Applications
+bindsym Ctrl+Alt+Return exec $term
+bindsym Ctrl+Alt+d exec $menu
+bindsym Ctrl+Alt+q kill
+bindsym Ctrl+Alt+r reload
+bindsym Ctrl+Alt+e exec swaynag -t warning -m 'Exit Sway?' -b 'Yes' 'swaymsg exit'
+
+# Semantic workspaces
+set $ws1 "1: information"
+set $ws2 "2: development"
+set $ws3 "3: infrastructure"
+set $ws4 "4: documentation"
+set $ws5 "5: monitoring"
+set $ws6 "6: scratch"
+set $ws7 "7: administration"
+set $ws8 "8: temporary"
+
+# Switch workspaces
+bindsym Ctrl+Alt+1 workspace $ws1
+bindsym Ctrl+Alt+2 workspace $ws2
+bindsym Ctrl+Alt+3 workspace $ws3
+bindsym Ctrl+Alt+4 workspace $ws4
+bindsym Ctrl+Alt+5 workspace $ws5
+bindsym Ctrl+Alt+6 workspace $ws6
+bindsym Ctrl+Alt+7 workspace $ws7
+bindsym Ctrl+Alt+8 workspace $ws8
+
+# Move focused window to workspace
+bindsym Ctrl+Alt+Shift+1 move container to workspace $ws1
+bindsym Ctrl+Alt+Shift+2 move container to workspace $ws2
+bindsym Ctrl+Alt+Shift+3 move container to workspace $ws3
+bindsym Ctrl+Alt+Shift+4 move container to workspace $ws4
+bindsym Ctrl+Alt+Shift+5 move container to workspace $ws5
+bindsym Ctrl+Alt+Shift+6 move container to workspace $ws6
+bindsym Ctrl+Alt+Shift+7 move container to workspace $ws7
+bindsym Ctrl+Alt+Shift+8 move container to workspace $ws8
+
+# Minimal window focus only
+bindsym Ctrl+Alt+h focus left
+bindsym Ctrl+Alt+j focus down
+bindsym Ctrl+Alt+k focus up
+bindsym Ctrl+Alt+l focus right
+
+# Floating is exceptional
+bindsym Ctrl+Alt+space floating toggle
+bindsym Ctrl+Alt+f fullscreen toggle
+
+# Appearance
+default_border pixel 2
+gaps inner 0
+gaps outer 0
+
+# Bar
+bar {
+    status_command waybar
+}
