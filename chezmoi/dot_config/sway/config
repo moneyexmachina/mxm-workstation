@@ -59,4 +59,5 @@ gaps inner 0
 gaps outer 0
 
 # Bar
-exec waybar
+# Todo: implement a waybar with the wanted elements
+# exec waybar
