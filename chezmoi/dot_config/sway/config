@@ -24,13 +24,13 @@ set $ws6 "6: system"
 set $ws7 "7: scratch"
 
 # Switch workspaces
-bindsym Ctrl+Alt+1 workspace $ws1; exec ws-notify web
-bindsym Ctrl+Alt+2 workspace $ws2; exec ws-notify project
-bindsym Ctrl+Alt+3 workspace $ws3; exec ws-notify alt-project
-bindsym Ctrl+Alt+4 workspace $ws4; exec ws-notify docs
-bindsym Ctrl+Alt+5 workspace $ws5; exec ws-notify visuals
-bindsym Ctrl+Alt+6 workspace $ws6; exec ws-notify system
-bindsym Ctrl+Alt+7 workspace $ws7; exec ws-notify scratch
+bindsym Ctrl+Alt+1 workspace $ws1, exec ws-notify web
+bindsym Ctrl+Alt+2 workspace $ws2, exec ws-notify project
+bindsym Ctrl+Alt+3 workspace $ws3, exec ws-notify alt-project
+bindsym Ctrl+Alt+4 workspace $ws4, exec ws-notify docs
+bindsym Ctrl+Alt+5 workspace $ws5, exec ws-notify visuals
+bindsym Ctrl+Alt+6 workspace $ws6, exec ws-notify system
+bindsym Ctrl+Alt+7 workspace $ws7, exec ws-notify scratch
 
 # Move focused window to workspace
 bindsym Ctrl+Alt+Shift+1 move container to workspace $ws1
