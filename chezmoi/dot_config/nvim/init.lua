@@ -649,6 +649,14 @@ require("lazy").setup({
         "query",
         "vim",
         "vimdoc",
+        "python",
+      },
+      highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = false,
+      },
+      indent = {
+        enable = true,
       },
       install_dir = vim.fn.stdpath "data" .. "/site",
     },
@@ -745,22 +753,22 @@ require("lazy").setup({
     },
   },
 })
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = {
-    "bash",
-    "c",
-    "diff",
-    "html",
-    "lua",
-    "luadoc",
-    "query",
-    "vim",
-    "vimdoc",
-  },
-  callback = function(args)
-    vim.treesitter.start(args.buf)
-  end,
-})
+--vim.api.nvim_create_autocmd("FileType", {
+--  pattern = {
+--    "bash",
+--    "c",
+--    "diff",
+--    "html",
+--    "lua",
+--    "luadoc",
+--    "query",
+--    "vim",
+--    "vimdoc",
+--  },
+--  callback = function(args)
+--    vim.treesitter.start(args.buf)
+--  end,
+--})
 -- Treat *.tsv as CSV for motions, and color/align as tab-delimited
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = "*.tsv",
