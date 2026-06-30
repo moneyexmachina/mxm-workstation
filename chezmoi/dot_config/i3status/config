@@ -1,0 +1,10 @@
+general {
+    output_format = "i3bar"
+    interval = 5
+}
+
+order += "tztime"
+
+tztime time {
+    format = "%H:%M"
+}

@@ -15,14 +15,13 @@ bindsym Ctrl+Alt+r reload
 bindsym Ctrl+Alt+e exec swaynag -t warning -m 'Exit Sway?' -b 'Yes' 'swaymsg exit'
 
 # Semantic workspaces
-set $ws1 "1: information"
-set $ws2 "2: development"
-set $ws3 "3: infrastructure"
-set $ws4 "4: documentation"
-set $ws5 "5: monitoring"
-set $ws6 "6: scratch"
-set $ws7 "7: administration"
-set $ws8 "8: temporary"
+set $ws1 "1: web"
+set $ws2 "2: project"
+set $ws3 "3: alt-project"
+set $ws4 "4: docs"
+set $ws5 "5: visuals"
+set $ws6 "6: system"
+set $ws7 "7: scratch"
 
 # Switch workspaces
 bindsym Ctrl+Alt+1 workspace $ws1
@@ -32,7 +31,6 @@ bindsym Ctrl+Alt+4 workspace $ws4
 bindsym Ctrl+Alt+5 workspace $ws5
 bindsym Ctrl+Alt+6 workspace $ws6
 bindsym Ctrl+Alt+7 workspace $ws7
-bindsym Ctrl+Alt+8 workspace $ws8
 
 # Move focused window to workspace
 bindsym Ctrl+Alt+Shift+1 move container to workspace $ws1
@@ -42,7 +40,6 @@ bindsym Ctrl+Alt+Shift+4 move container to workspace $ws4
 bindsym Ctrl+Alt+Shift+5 move container to workspace $ws5
 bindsym Ctrl+Alt+Shift+6 move container to workspace $ws6
 bindsym Ctrl+Alt+Shift+7 move container to workspace $ws7
-bindsym Ctrl+Alt+Shift+8 move container to workspace $ws8
 
 # Minimal window focus only
 bindsym Ctrl+Alt+h focus left
@@ -66,3 +63,17 @@ include ~/.config/sway/outputs
 # Bar
 # Todo: implement a waybar with the wanted elements
 # exec waybar
+
+bar {
+    position top
+
+    status_command i3status
+
+    colors {
+        statusline #AAB1A4
+        background #0D171D
+        inactive_workspace #0D171D #0D171D #42565A
+        active_workspace   #1F2E34 #1F2E34 #EFEFEF
+        focused_workspace  #1F2E34 #E3C98A #0D171D
+    }
+}
