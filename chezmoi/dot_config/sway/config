@@ -9,6 +9,7 @@ font pango:FiraCode Nerd Font 14
 # Applications
 bindsym Ctrl+Alt+Return exec $term
 bindsym Ctrl+Alt+d exec $menu
+bindsym Ctrl+Alt+f exec firefox
 bindsym Ctrl+Alt+q kill
 bindsym Ctrl+Alt+r reload
 bindsym Ctrl+Alt+e exec swaynag -t warning -m 'Exit Sway?' -b 'Yes' 'swaymsg exit'
