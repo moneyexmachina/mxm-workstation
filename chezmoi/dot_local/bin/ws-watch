@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
 swaymsg -t subscribe '["workspace"]' |
-jq --unbuffered -r '.current.name' |
+jq --unbuffered -r '
+  select(.change == "focus") |
+  .current.name
+' |
 while read -r ws; do
-    ws-notify "$ws"
+  [ -n "$ws" ] && ws-notify "$ws"
 done
