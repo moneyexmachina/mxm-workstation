@@ -1,2 +1,2 @@
 exec_always mako
-exec_always ws-watch
+exec_always /home/mxm/.local/bin/ws-watch
