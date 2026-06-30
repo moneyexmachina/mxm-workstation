@@ -52,6 +52,7 @@ bindsym Ctrl+Alt+l focus right
 
 # Floating is exceptional
 bindsym Ctrl+Alt+space floating toggle
+bindsym Ctrl+Alt+Shift+f fullscreen toggle
 
 # Appearance
 default_border none
