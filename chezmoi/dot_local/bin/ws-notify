@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+ws="$1"
+
+case "$ws" in
+  web) label="Web" ;;
+  project) label="Project" ;;
+  alt-project) label="Alt Project" ;;
+  docs) label="Docs" ;;
+  visuals) label="Visuals" ;;
+  system) label="System" ;;
+  scratch) label="Scratch" ;;
+  *) label="$ws" ;;
+esac
+
+notify-send "Workspace → $label"

@@ -24,13 +24,13 @@ set $ws6 "6: system"
 set $ws7 "7: scratch"
 
 # Switch workspaces
-bindsym Ctrl+Alt+1 workspace $ws1
-bindsym Ctrl+Alt+2 workspace $ws2
-bindsym Ctrl+Alt+3 workspace $ws3
-bindsym Ctrl+Alt+4 workspace $ws4
-bindsym Ctrl+Alt+5 workspace $ws5
-bindsym Ctrl+Alt+6 workspace $ws6
-bindsym Ctrl+Alt+7 workspace $ws7
+bindsym Ctrl+Alt+1 workspace $ws1; exec ws-notify web
+bindsym Ctrl+Alt+2 workspace $ws2; exec ws-notify project
+bindsym Ctrl+Alt+3 workspace $ws3; exec ws-notify alt-project
+bindsym Ctrl+Alt+4 workspace $ws4; exec ws-notify docs
+bindsym Ctrl+Alt+5 workspace $ws5; exec ws-notify visuals
+bindsym Ctrl+Alt+6 workspace $ws6; exec ws-notify system
+bindsym Ctrl+Alt+7 workspace $ws7; exec ws-notify scratch
 
 # Move focused window to workspace
 bindsym Ctrl+Alt+Shift+1 move container to workspace $ws1
@@ -63,17 +63,3 @@ include ~/.config/sway/outputs
 # Bar
 # Todo: implement a waybar with the wanted elements
 # exec waybar
-
-bar {
-    position top
-
-    status_command i3status
-
-    colors {
-        statusline #AAB1A4
-        background #0D171D
-        inactive_workspace #0D171D #0D171D #42565A
-        active_workspace   #1F2E34 #1F2E34 #EFEFEF
-        focused_workspace  #1F2E34 #E3C98A #0D171D
-    }
-}
