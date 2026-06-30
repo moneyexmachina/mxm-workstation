@@ -1,0 +1,5 @@
+# Framework 14 internal display
+output eDP-1 {
+    mode 2256x1504@60Hz
+    scale 1.5
+}

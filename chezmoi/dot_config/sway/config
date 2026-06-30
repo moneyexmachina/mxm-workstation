@@ -4,7 +4,7 @@
 set $term kitty
 set $menu wofi --show drun
 
-font pango:FiraCode Nerd Font 10
+font pango:FiraCode Nerd Font 14
 
 # Applications
 bindsym Ctrl+Alt+Return exec $term
@@ -58,6 +58,9 @@ default_border none
 default_floating_border normal
 gaps inner 0
 gaps outer 0
+
+# Output config:
+include ~/.config/sway/outputs
 
 # Bar
 # Todo: implement a waybar with the wanted elements
