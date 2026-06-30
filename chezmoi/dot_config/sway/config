@@ -60,6 +60,8 @@ gaps outer 0
 # Output config:
 include ~/.config/sway/outputs
 
+# Startup
+include ~/.config/sway/startup
 # Bar
 # Todo: implement a waybar with the wanted elements
 # exec waybar
