@@ -1,2 +1,3 @@
 exec_always mako
 exec_always /home/mxm/.local/bin/ws-watch
+exec_always dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway:wlroots XDG_SESSION_TYPE=wayland
