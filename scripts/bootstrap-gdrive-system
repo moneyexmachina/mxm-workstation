@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${EUID}" -ne 0 ]]; then
+    echo "Error: run through sudo from the administrative account." >&2
+    exit 1
+fi
+
+install \
+    -d \
+    -o mxm \
+    -g mxm \
+    -m 0700 \
+    /mnt/gdrive
+
+echo "/mnt/gdrive prepared for mxm."

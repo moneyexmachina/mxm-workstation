@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly EXPECTED_USER="mxm"
+readonly MOUNT_POINT="/mnt/gdrive"
+readonly RCLONE_CONFIG="${HOME}/.config/rclone/rclone.conf"
+readonly CACHE_DIR="${HOME}/.cache/rclone/gdrive-vfs"
+readonly SERVICE="rclone-gdrive.service"
+
+if [[ "$(id -un)" != "${EXPECTED_USER}" ]]; then
+    echo "Error: run this script as ${EXPECTED_USER}." >&2
+    exit 1
+fi
+
+if ! command -v rclone >/dev/null 2>&1; then
+    echo "Error: rclone is not installed." >&2
+    exit 1
+fi
+
+if [[ ! -r "${RCLONE_CONFIG}" ]]; then
+    echo "Error: ${RCLONE_CONFIG} does not exist or is not readable." >&2
+    echo "Run 'rclone config' as ${EXPECTED_USER} first." >&2
+    exit 1
+fi
+
+if [[ ! -d "${MOUNT_POINT}" ]]; then
+    echo "Error: ${MOUNT_POINT} does not exist." >&2
+    echo "Create it from the administrative account with:" >&2
+    echo "  sudo install -d -o mxm -g mxm -m 0700 ${MOUNT_POINT}" >&2
+    exit 1
+fi
+
+if [[ ! -w "${MOUNT_POINT}" ]]; then
+    echo "Error: ${MOUNT_POINT} is not writable by ${EXPECTED_USER}." >&2
+    exit 1
+fi
+
+mkdir -p "${CACHE_DIR}"
+chmod 700 "${HOME}/.cache/rclone" "${CACHE_DIR}"
+
+echo "Enabling ${SERVICE}..."
+systemctl --user daemon-reload
+systemctl --user enable --now "${SERVICE}"
+
+echo
+systemctl --user --no-pager --full status "${SERVICE}"
+
+echo
+if mountpoint -q "${MOUNT_POINT}"; then
+    echo "Google Drive is mounted at ${MOUNT_POINT}."
+else
+    echo "Error: ${MOUNT_POINT} is not mounted." >&2
+    exit 1
+fi

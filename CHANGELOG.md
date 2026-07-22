@@ -1,165 +1,239 @@
-# Changelog
 All notable changes to this project will be documented in this file.
 
 This project adheres to [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-## [0.1.1] - 2026-05-06
-
-### Fixed
-
-- Corrected MXM namespace package policy for Poetry package declarations.
-- Changed canonical Poetry package inclusion from leaf package form:
-
-  ```toml
-  packages = [{ include = "mxm/<package>", from = "src" }]
-  ```
-
-  to namespace root form:
-
-  ```toml
-  packages = [{ include = "mxm", from = "src" }]
-  ```
-
-- Added validation that `src/mxm` is a PEP 420 namespace package root and does not contain `__init__.py`.
-- Added validation that `src/mxm/<package>` matches the Poetry distribution name suffix.
-- Updated pyproject policy coverage to include MXM namespace package structure checks.
-- Removed reliance on the obsolete “Other checks” policy grouping from CLI tests.
-
-### Changed
-
-- Clarified the separation between filesystem-derived checks and Python project/package setup policy.
-- Updated canonical `pyproject.toml` expectations for all MXM packages.
-- Updated test coverage for namespace package layout, Poetry package declarations, and CLI policy output.
-
-### Notes
-
-- This release fixes a policy error discovered during Session 42 while applying `mxm-foundry` to `mxm-types`.
-- The previous policy incorrectly required Poetry to include the leaf package path, which conflicted with the intended MXM namespace package model.
-## [0.1.0] — 2026-05-04
 
 ### Added
 
-#### Core CLI
-- `mxm-foundry` CLI with `check` command for validating MXM Python packages against canonical standards.
-- Deterministic check runner producing structured output across checks and policies.
-- Exit code semantics suitable for CI/CD integration (non-zero on failure).
+#### Workstation configuration
 
-#### Check System
-- Typed `Check`, `CheckResult`, and `Policy` models for composable validation logic.
-- Central registry for all checks with code-based lookup and duplicate detection.
-- Deterministic execution order and grouping of checks into policies and misc categories.
+- Added a chezmoi-managed source state for the canonical MXM Linux workstation.
+- Added Zsh login and interactive-shell configuration.
+- Added Starship prompt configuration.
+- Added Kitty terminal configuration.
+- Added tmux workspace configuration.
+- Added Neovim configuration based on Kickstart.nvim, including:
+  - language-server integration;
+  - Mason-managed development tooling;
+  - debugging support;
+  - linting support;
+  - Git integration;
+  - file-tree navigation;
+  - automatic pair insertion;
+  - custom MXM key mappings;
+  - Python virtual-environment support;
+  - CSV-specific editing configuration.
+- Added Sway Wayland desktop configuration.
+- Added display-output and desktop-session startup configuration.
+- Added i3status status-bar configuration.
+- Added Mako notification configuration.
+- Added systemd user-service support under
+  `chezmoi/dot_config/systemd/user/`.
 
-#### Filesystem Checks (FS)
-- Validation of required project structure:
-  - `README.md`, `LICENSE`, `pyproject.toml`, `pyrightconfig.json`, `Makefile`
-  - `tests/`, `src/mxm/`, single package directory, `py.typed`
-  - `CHANGELOG.md`
+#### Bootstrap and provisioning
 
-#### Pyproject Checks (PY)
-- Structural validation of `pyproject.toml`:
-  - `[tool.poetry]` presence and naming conventions (`mxm-*`)
-  - `src/mxm` package layout enforcement
-  - Required sections:
-    - `[tool.poetry.dependencies]`
-    - `[tool.poetry.group.dev.dependencies]`
-    - `[build-system]`
-    - `[tool.pytest.ini_options]`
-  - Enforcement of `py.typed` inclusion in packaging metadata
-- Explicit prohibition of `[tool.pyright]` in favour of `pyrightconfig.json`
+- Added `bootstrap/packages.yaml` for recording workstation package
+  requirements.
+- Added `bootstrap/neovim.md` for Neovim bootstrap and setup guidance.
+- Added explicit separation between:
+  - machine-level provisioning;
+  - chezmoi-managed user configuration;
+  - local identity and secret state.
+- Added the `adminsecure` and `mxm` privilege model:
+  - `adminsecure` performs explicitly authorised system administration;
+  - `mxm` performs routine development and workstation operation without
+    unrestricted `sudo` access.
 
-#### Canonical Configuration Checks
-- Exact-match validation against canonical MXM configuration:
-  - `[tool.black]`
-  - `[tool.ruff]`
-  - `[tool.ruff.lint]`
-  - `[tool.ruff.lint.isort]`
-  - `[tool.isort]`
-  - `pyrightconfig.json`
+#### Google Drive integration
 
-#### Makefile Checks (MK)
-- Parsing-based validation of Makefile targets and commands
-- Canonical enforcement of:
-  - `type`, `lint`, `fmt`, `test`, `check`, `ci` targets
-  - Correct invocation of `pyright`, `ruff`, `black`, `isort`, `pytest`
-- Structural validation of `check` and `ci` orchestration targets
+- Added an rclone-based Google Drive filesystem mount at:
 
-#### Policies
-- **License policy**
-  - Requires presence and canonical match of `LICENSE`
-- **Typing policy**
-  - Enforces `pyrightconfig.json`, absence of `[tool.pyright]`, and typing markers
-- **Formatting policy**
-  - Enforces canonical tool configuration and Makefile integration
-- **Pyproject policy**
-  - Enforces structural correctness and packaging semantics
-- **Testing policy**
-  - Enforces pytest usage and correct invocation via Makefile
-- **Check-gate policy**
-  - Formalises `make check` as the required integration point for all validation
-- **Documentation policy**
-  - Requires `README.md` structure and `CHANGELOG.md` with minimal format
-- **Misc policy**
-  - Covers remaining structural checks not part of explicit policies
+  ```text
+  /mnt/gdrive
+  ```
 
-#### Documentation Validation (DOC)
-- `README.md` must contain required sections:
-  - Purpose, Installation, Usage, Development
-- `CHANGELOG.md` must follow minimal *Keep a Changelog* structure:
-  - `# Changelog`, `## Unreleased`
+- Added the systemd user unit:
 
-#### Canonical Configuration
-- Introduced canonical reference files:
-  - `canonical/pyproject.toml`
-  - `canonical/pyrightconfig.json`
-  - `canonical/Makefile`
-- All configuration checks derive from canonical definitions to prevent drift.
+  ```text
+  chezmoi/dot_config/systemd/user/rclone-gdrive.service
+  ```
 
-#### Test Suite
-- Comprehensive pytest suite covering:
-  - Individual predicates
-  - Policy aggregation
-  - CLI output and exit codes
-  - Registry integrity and documentation synchronisation
-- Strict coupling between:
-  - `docs/check-codes.md`
-  - expected test codes
-  - implemented checks
+- Configured the Google Drive mount with:
+  - full rclone VFS caching;
+  - a bounded local cache;
+  - automatic polling for remote changes;
+  - user-only filesystem permissions;
+  - browser-link representations for Google-native files;
+  - automatic startup with the `mxm` user session.
+- Added:
+
+  ```text
+  scripts/bootstrap-gdrive-system
+  ```
+
+  for privileged preparation of the system mount point.
+
+- Added:
+
+  ```text
+  scripts/bootstrap-gdrive-mount
+  ```
+
+  for validating, enabling and starting the `mxm` user-level mount service.
+
+- Added:
+
+  ```text
+  docs/google-drive.md
+  ```
+
+  documenting:
+  - architecture;
+  - authority and privilege boundaries;
+  - Google OAuth setup;
+  - initial provisioning;
+  - normal operation;
+  - systemd service management;
+  - VFS caching behaviour;
+  - deletion behaviour;
+  - offline limitations;
+  - validation;
+  - troubleshooting and recovery;
+  - secret-safety requirements.
+
+#### Documentation
+
+- Added a project README describing:
+  - the purpose of `mxm-workstation`;
+  - the workstation contract;
+  - the repository structure;
+  - the chezmoi source and deployment model;
+  - the `mxm` and `adminsecure` privilege boundary;
+  - managed shell, terminal, editor and desktop components;
+  - machine provisioning;
+  - local identity and secret state;
+  - current workstation capabilities;
+  - the capability-oriented development workflow.
+- Added operational documentation under `docs/`.
+- Added this workstation-specific changelog.
 
 ### Changed
-- Refactored Makefile validation to derive expectations from canonical Makefile rather than hardcoded command sets.
-- Generalised TOML comparison logic to support arbitrary `[tool.*]` blocks.
-- Reorganised policy structure to reflect semantic domains (typing, formatting, testing, etc.).
-- Improved CLI output clarity and grouping by policy.
+
+- Replaced the inherited `mxm-foundry` README content with documentation
+  specific to `mxm-workstation`.
+- Replaced the inherited `mxm-foundry` changelog history with a
+  workstation-specific changelog.
+- Updated the documented current scope to reflect capabilities already present
+  in the repository rather than treating tmux, Neovim and Sway as future work.
+- Clarified that the repository uses a top-level `chezmoi/` source-state
+  directory.
+- Clarified the mapping between chezmoi source paths and deployed home-directory
+  paths.
+- Defined the repository as the authority for stable declarative workstation
+  configuration.
+- Defined explicit machine-level bootstrap steps for operations that cannot be
+  performed through ordinary user dotfile application.
+- Established capability-oriented workstation development as the standard
+  workflow:
+
+  ```text
+  identify a missing capability
+  → implement its source configuration
+  → document its operating and authority model
+  → inspect with chezmoi diff
+  → apply with chezmoi
+  → test the deployed behaviour
+  → inspect repository changes
+  → commit the proven capability
+  ```
+
+### Security
+
+- Kept Google OAuth credentials and refresh tokens outside the repository.
+- Kept the live rclone configuration outside the repository:
+
+  ```text
+  ~/.config/rclone/rclone.conf
+  ```
+
+- Kept rclone VFS cache state outside the repository:
+
+  ```text
+  ~/.cache/rclone/
+  ```
+
+- Configured the Google Drive mount with user-only permissions through:
+
+  ```text
+  --umask=077
+  ```
+
+- Replaced rclone's retiring shared Google OAuth client with a dedicated
+  personal Google OAuth desktop client.
+- Separated root-owned mount-point creation from user-level service activation.
+- Prevented the normal `mxm` account from requiring unrestricted administrative
+  privileges.
+- Documented that private keys, OAuth tokens, application sessions, caches and
+  runtime logs must not be committed.
 
 ### Fixed
-- Eliminated drift between canonical configuration and predicate logic by enforcing canonical-based comparisons.
-- Resolved inconsistencies in minimal project fixtures used for testing.
-- Stabilised CLI tests by removing brittle global count assertions.
 
-### Notes
-- This release establishes the first **MXM package standardisation contract**.
-- A package passing `mxm-foundry check` satisfies all structural, typing, formatting, testing, and documentation requirements for publication.
-- `make check` is now the canonical integration point for validation and CI.
+- Corrected the README's outdated description of the repository's implemented
+  components.
+- Corrected the README's previous treatment of tmux, Neovim and Sway as future
+  scope.
+- Corrected the changelog, which previously documented `mxm-foundry` rather
+  than `mxm-workstation`.
+- Removed the conceptual ambiguity between:
+  - declarative dotfiles;
+  - privileged machine provisioning;
+  - local secret-bearing state.
+- Prevented the rclone bootstrap process from attempting to invoke `sudo`
+  through the unprivileged `mxm` account.
+- Split Google Drive provisioning into:
+  - an administrative system-preparation script;
+  - an unprivileged user-service activation script.
 
-### Upgrade Guidance
-- Ensure your package includes:
-  - Canonical `pyproject.toml`, `pyrightconfig.json`, and `Makefile`
-  - Required filesystem structure and documentation files
-- Run:
+### Validated
+
+- Verified the Google Drive remote using:
+
   ```bash
-  mxm-foundry check <project-root>
+  rclone lsd gdrive:
+  ```
 
+- Verified creation, rename and deletion of ordinary files through the mounted
+  Linux filesystem.
+- Verified propagation of Linux filesystem changes to the Google Drive web
+  interface.
+- Verified that deletions are represented through Google Drive Trash.
+- Verified the rclone mount manually before systemd automation.
+- Verified the systemd user-unit configuration.
+- Verified automatic service enablement.
+- Verified that the Google Drive mount is active at:
 
-## [0.0.1] — 2025-10-31
-### Added
-- Initial repository scaffold with `src/mxm/foundry/` namespace layout.
-- `pyproject.toml` with Poetry, dev toolchain (Ruff, Black, Isort, Pyright, Pytest).
-- `pyrightconfig.json` (Python 3.13, strict mode).
-- `Makefile` with standard targets (`fmt`, `lint`, `type`, `test`, `check`, etc.).
-- `README.md` and `LICENSE` (MIT).
-- `.gitignore` for Python, Poetry, and tool caches.
-- `py.typed` marker and inclusion in packaging.
-- Minimal CLI stub (`mxm-foundry`) with `new` and `check` placeholders.
-- `tests/test_smoke.py` covering version import and CLI basics.
+  ```text
+  /mnt/gdrive
+  ```
+
+- Verified that the mount can be stopped and restarted through:
+
+  ```bash
+  systemctl --user
+  ```
+
+### Notes
+
+- Google Drive remains the authoritative file store.
+- `/mnt/gdrive` is a Linux operational interface, not a complete local mirror.
+- Google Docs, Sheets and Slides remain browser-managed.
+- The rclone service starts when the `mxm` user session starts.
+- The Google Drive bootstrap scripts are normally run once per machine.
+- Runtime caches and generated logs are operational state rather than
+  declarative workstation configuration.
+- Historical releases have not been reconstructed from the previous changelog
+  because that file described a different project. The first formal
+  `mxm-workstation` release should be created deliberately from this
+  workstation-specific baseline.

@@ -41,4 +41,8 @@ node_modules/
 site/
 docs/_build/
 
+# Runtime logs
+.log
+
+
 # end: mxm-foundry:end
