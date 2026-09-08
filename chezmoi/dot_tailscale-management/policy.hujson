@@ -6,7 +6,17 @@
 	//     ~/.tailscale-management/README.md
 	//
 	// Tailscale provides private network reachability and service identity.
-	// Ordinary OpenSSH remains the administrative host-authentication layer.
+	//
+	// Administrative trust model:
+	//
+	//   Alex-owned fixed infrastructure:
+	//       ordinary OpenSSH
+	//
+	//   Reconstructible MXM service appliances:
+	//       Tailscale SSH
+	//
+	// Tailscale therefore manages both network reachability and SSH trust
+	// from Alex-owned infrastructure to disposable MXM appliances.
 	// ---------------------------------------------------------------------
 
 	"tagOwners": {
@@ -38,8 +48,10 @@
 			"ip":  ["*"],
 		},
 
-		// Owner devices may administer MXM service appliances using
-		// ordinary OpenSSH over the Tailscale transport.
+		// Owner devices may reach the SSH service on MXM appliances.
+		//
+		// Actual SSH authorization is separately governed by the
+		// Tailscale SSH policy below.
 		{
 			"src": ["autogroup:owner"],
 			"dst": [
@@ -50,7 +62,24 @@
 		},
 	],
 
-	// Security invariants checked whenever the policy changes.
+	// Tailscale SSH is the administrative trust layer for reconstructible
+	// MXM service appliances.
+	//
+	// The Tailnet Owner may log in only as the dedicated `mxm` operator
+	// account. Root and arbitrary non-root login are not granted.
+	"ssh": [
+		{
+			"action": "accept",
+			"src": ["autogroup:owner"],
+			"dst": [
+				"tag:mxm-security",
+				"tag:mxm-factory-agent",
+			],
+			"users": ["mxm"],
+		},
+	],
+
+	// Security invariants checked whenever the network policy changes.
 	"tests": [
 		// Owner devices retain access to the Owner's own devices.
 		{
@@ -61,7 +90,7 @@
 			],
 		},
 
-		// The Tailnet Owner may administer MXM appliances over SSH,
+		// The Tailnet Owner may reach SSH on MXM appliances,
 		// but does not receive arbitrary service access.
 		{
 			"src":   "moneyexmachina@github",
@@ -100,7 +129,20 @@
 		},
 	],
 
-	// Tailscale SSH deliberately omitted.
-	// Administrative SSH uses ordinary OpenSSH and Alex's
-	// hardware-backed SSH credential.
+	// Tailscale SSH invariants are tested independently from network
+	// reachability.
+	"sshTests": [
+		{
+			"src": "moneyexmachina@github",
+			"dst": [
+				"tag:mxm-security",
+				"tag:mxm-factory-agent",
+			],
+			"accept": ["mxm"],
+			"deny": [
+				"root",
+				"openbao",
+			],
+		},
+	],
 }
