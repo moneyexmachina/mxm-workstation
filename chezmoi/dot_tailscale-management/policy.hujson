@@ -60,6 +60,16 @@
 			],
 			"ip": ["tcp:22"],
 		},
+		// Autonomous factory appliances may reach the workload-facing
+		// OpenBao HTTPS endpoint on mxm-security.
+		//
+		// This grants network reachability only. OpenBao workload
+		// authentication and authorization remain independently required.
+		{
+			"src": ["tag:mxm-factory-agent"],
+			"dst": ["tag:mxm-security"],
+			"ip":  ["tcp:443"],
+		},
 	],
 
 	// Tailscale SSH is the administrative trust layer for reconstructible
@@ -110,13 +120,15 @@
 		{
 			"src":   "tag:mxm-factory-agent",
 			"proto": "tcp",
+			"accept": [
+		        "tag:mxm-security:443",
+		    	],
 			"deny": [
-				"tag:mxm-security:22",
-				"tag:mxm-security:8200",
-				"moneyexmachina@github:22",
-			],
-		},
-
+		        "tag:mxm-security:22",
+		        "tag:mxm-security:8200",
+		        "moneyexmachina@github:22",
+		        ],
+		},	
 		// The MXM security identity likewise receives no implicit
 		// lateral access to the autonomous agent or Alex infrastructure.
 		{
