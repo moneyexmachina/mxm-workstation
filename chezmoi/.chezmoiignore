@@ -4,3 +4,10 @@
 {{- if not (has "operator" .workstationProfiles) }}
 .config/systemd/user/rclone-gdrive.service
 {{- end }}
+
+{{- if not (has "desktop" .workstationProfiles) }}
+.config/kitty/
+.config/sway/
+.config/i3status/
+.config/mako/
+{{- end }}
