@@ -1,7 +1,10 @@
 ubuntu:
   - gh
   - pipx
+  - python3
+  - python3-venv
   - shellcheck
+  - make 
   - kitty-terminfo
 
 external:
