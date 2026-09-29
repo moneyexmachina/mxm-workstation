@@ -1,3 +1,6 @@
 .config/tmux-client-*.log
 .config/tmux-server-*.log
 
+{{- if not (has "operator" .workstationProfiles) }}
+.config/systemd/user/rclone-gdrive.service
+{{- end }}
