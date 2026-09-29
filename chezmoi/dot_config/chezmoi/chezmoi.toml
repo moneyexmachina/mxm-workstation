@@ -1,4 +1,0 @@
-sourceDir = "/home/mxm/mxm-workstation/chezmoi"
-
-[data]
-workstationProfiles = ["base", "desktop", "operator"]
