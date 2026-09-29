@@ -1,3 +1,9 @@
-packages:
-  ubuntu:
-    - kitty-terminfo
+ubuntu:
+  - gh
+  - pipx
+  - shellcheck
+  - kitty-terminfo
+
+external:
+  - poetry
+  - droid

@@ -1,12 +1,21 @@
 ubuntu:
   - git
   - curl
+  - jq
+  - unzip
+  - tree
   - tmux
   - zsh
   - neovim
   - ripgrep
   - fd-find
-  - luarocks
+  - fzf
   - lua5.1
+  - luarocks
   - nodejs
   - npm
+  - tree-sitter-cli
+
+external:
+  - chezmoi
+  - starship
