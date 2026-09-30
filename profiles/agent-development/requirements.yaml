@@ -10,3 +10,6 @@ ubuntu:
 external:
   - poetry
   - droid
+
+capabilities:
+  - remote-clipboard-write-via-osc52
