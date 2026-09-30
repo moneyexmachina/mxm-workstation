@@ -1,239 +1,183 @@
 All notable changes to this project will be documented in this file.
 
-This project adheres to [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
-and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and uses semantic versioning for tagged workstation releases.
 
 ## [Unreleased]
 
 ### Added
 
-#### Workstation configuration
+#### Workstation profiles
 
-- Added a chezmoi-managed source state for the canonical MXM Linux workstation.
+- Added composable workstation profiles:
+  - `base`;
+  - `desktop`;
+  - `operator`;
+  - `agent-development`.
+- Added `profiles/README.md` documenting the profile model.
+- Added profile-specific `requirements.yaml` files describing the capabilities and applications required by each role.
+- Defined example workstation compositions:
+  - Forge as `base + desktop + operator`;
+  - `mxm-factory-agent` as `base + agent-development`.
+- Defined requirements as workstation contracts rather than package-manager or provisioning input.
+
+#### Declarative workstation configuration
+
+- Added a shared chezmoi source state for MXM workstation configuration.
 - Added Zsh login and interactive-shell configuration.
 - Added Starship prompt configuration.
-- Added Kitty terminal configuration.
 - Added tmux workspace configuration.
 - Added Neovim configuration based on Kickstart.nvim, including:
   - language-server integration;
   - Mason-managed development tooling;
-  - debugging support;
-  - linting support;
+  - debugging;
+  - linting;
   - Git integration;
-  - file-tree navigation;
+  - fuzzy navigation;
   - automatic pair insertion;
-  - custom MXM key mappings;
   - Python virtual-environment support;
-  - CSV-specific editing configuration.
+  - CSV-specific editing behaviour;
+  - MXM-specific mappings.
+- Added Kitty terminal configuration.
 - Added Sway Wayland desktop configuration.
-- Added display-output and desktop-session startup configuration.
 - Added i3status status-bar configuration.
 - Added Mako notification configuration.
-- Added systemd user-service support under
-  `chezmoi/dot_config/systemd/user/`.
+- Added systemd user-service support.
 
-#### Bootstrap and provisioning
+#### Profile-aware deployment
 
-- Added `bootstrap/packages.yaml` for recording workstation package
-  requirements.
-- Added `bootstrap/neovim.md` for Neovim bootstrap and setup guidance.
-- Added explicit separation between:
-  - machine-level provisioning;
-  - chezmoi-managed user configuration;
-  - local identity and secret state.
-- Added the `adminsecure` and `mxm` privilege model:
-  - `adminsecure` performs explicitly authorised system administration;
-  - `mxm` performs routine development and workstation operation without
-    unrestricted `sudo` access.
+- Added profile selection through machine-local chezmoi data:
+  - `workstationProfiles`.
+- Added `.chezmoiignore` rules for selecting profile-specific configuration from the single shared chezmoi source tree.
+- Prevented desktop configuration from being deployed to headless workstations.
+- Prevented operator-only Google Drive configuration from being deployed to machines that do not select the `operator` profile.
+- Kept workstation profile selection instance-specific rather than deriving it from hostnames.
+
+#### Agent-development environment
+
+- Added requirements for the remote agent-development environment, including:
+  - GitHub CLI;
+  - pipx;
+  - ShellCheck;
+  - Kitty terminal information;
+  - Poetry;
+  - Droid.
+- Added OSC-52 remote clipboard capability for direct:
+
+  ```text
+  Kitty → SSH → tmux
+  ```
+
+  development sessions.
+- Configured tmux to propagate copy-mode selections to the outer terminal clipboard without requiring a graphical clipboard stack on the remote host.
 
 #### Google Drive integration
 
+- Added Google Drive as an `operator` capability.
 - Added an rclone-based Google Drive filesystem mount at:
 
   ```text
   /mnt/gdrive
   ```
 
-- Added the systemd user unit:
-
-  ```text
-  chezmoi/dot_config/systemd/user/rclone-gdrive.service
-  ```
-
-- Configured the Google Drive mount with:
-  - full rclone VFS caching;
-  - a bounded local cache;
-  - automatic polling for remote changes;
-  - user-only filesystem permissions;
-  - browser-link representations for Google-native files;
-  - automatic startup with the `mxm` user session.
-- Added:
-
-  ```text
-  scripts/bootstrap-gdrive-system
-  ```
-
-  for privileged preparation of the system mount point.
-
-- Added:
-
-  ```text
-  scripts/bootstrap-gdrive-mount
-  ```
-
-  for validating, enabling and starting the `mxm` user-level mount service.
-
-- Added:
-
-  ```text
-  docs/google-drive.md
-  ```
-
-  documenting:
+- Added a systemd user service for the mount.
+- Added separate privileged and user-level bootstrap operations.
+- Added documentation covering:
   - architecture;
-  - authority and privilege boundaries;
-  - Google OAuth setup;
+  - authority boundaries;
+  - OAuth setup;
   - initial provisioning;
   - normal operation;
-  - systemd service management;
-  - VFS caching behaviour;
+  - caching;
   - deletion behaviour;
-  - offline limitations;
   - validation;
-  - troubleshooting and recovery;
-  - secret-safety requirements.
-
-#### Documentation
-
-- Added a project README describing:
-  - the purpose of `mxm-workstation`;
-  - the workstation contract;
-  - the repository structure;
-  - the chezmoi source and deployment model;
-  - the `mxm` and `adminsecure` privilege boundary;
-  - managed shell, terminal, editor and desktop components;
-  - machine provisioning;
-  - local identity and secret state;
-  - current workstation capabilities;
-  - the capability-oriented development workflow.
-- Added operational documentation under `docs/`.
-- Added this workstation-specific changelog.
+  - troubleshooting;
+  - recovery;
+  - secret handling.
 
 ### Changed
 
-- Replaced the inherited `mxm-foundry` README content with documentation
-  specific to `mxm-workstation`.
-- Replaced the inherited `mxm-foundry` changelog history with a
-  workstation-specific changelog.
-- Updated the documented current scope to reflect capabilities already present
-  in the repository rather than treating tmux, Neovim and Sway as future work.
-- Clarified that the repository uses a top-level `chezmoi/` source-state
-  directory.
-- Clarified the mapping between chezmoi source paths and deployed home-directory
-  paths.
-- Defined the repository as the authority for stable declarative workstation
-  configuration.
-- Defined explicit machine-level bootstrap steps for operations that cannot be
-  performed through ordinary user dotfile application.
-- Established capability-oriented workstation development as the standard
-  workflow:
+- Replaced the previous flat workstation package list with profile-specific requirements under:
 
   ```text
-  identify a missing capability
-  → implement its source configuration
-  → document its operating and authority model
-  → inspect with chezmoi diff
-  → apply with chezmoi
-  → test the deployed behaviour
-  → inspect repository changes
-  → commit the proven capability
+  profiles/<profile>/requirements.yaml
   ```
+
+- Defined one shared chezmoi source tree rather than separate configuration trees per workstation role.
+- Moved Google Drive documentation and bootstrap scripts under:
+
+  ```text
+  profiles/operator/google-drive/
+  ```
+
+- Separated:
+  - workstation capability specification;
+  - declarative user configuration;
+  - machine-level realization;
+  - identity and secrets;
+  - runtime state.
+- Clarified that machine-level provisioning is external to ordinary chezmoi application.
+- Clarified that systems such as `mxm-infra` may realize the workstation contract for specific appliances.
+- Removed machine-specific profile selection from the shared chezmoi source configuration.
+- Defined profile selection as local workstation instance state.
+- Reframed the workstation from one canonical machine image into composable role and capability profiles.
+- Established capability-oriented workstation development as the normal workflow:
+
+  ```text
+  identify capability
+  → assign profile
+  → update contract
+  → implement configuration
+  → realize prerequisites
+  → apply
+  → test
+  → commit
+  ```
+
+### Removed
+
+- Removed the previous flat `bootstrap/packages.yaml` package declaration.
+- Removed Tailscale tailnet management from the workstation configuration.
+  Tailnet policy belongs to the external security/infrastructure management domain rather than to a user workstation profile.
+- Removed the assumption that every workstation has the same privileged local-administration account.
 
 ### Security
 
-- Kept Google OAuth credentials and refresh tokens outside the repository.
+- Kept credentials and authority-bearing state outside the repository, including:
+  - SSH private keys;
+  - OAuth credentials and refresh tokens;
+  - GitHub authentication state;
+  - password-manager state;
+  - OpenBao credentials;
+  - Tailscale provisioning credentials;
+  - application session tokens.
 - Kept the live rclone configuration outside the repository:
 
   ```text
   ~/.config/rclone/rclone.conf
   ```
 
-- Kept rclone VFS cache state outside the repository:
+- Kept rclone cache state outside the repository:
 
   ```text
   ~/.cache/rclone/
   ```
 
-- Configured the Google Drive mount with user-only permissions through:
-
-  ```text
-  --umask=077
-  ```
-
-- Replaced rclone's retiring shared Google OAuth client with a dedicated
-  personal Google OAuth desktop client.
-- Separated root-owned mount-point creation from user-level service activation.
-- Prevented the normal `mxm` account from requiring unrestricted administrative
-  privileges.
-- Documented that private keys, OAuth tokens, application sessions, caches and
-  runtime logs must not be committed.
-
-### Fixed
-
-- Corrected the README's outdated description of the repository's implemented
-  components.
-- Corrected the README's previous treatment of tmux, Neovim and Sway as future
-  scope.
-- Corrected the changelog, which previously documented `mxm-foundry` rather
-  than `mxm-workstation`.
-- Removed the conceptual ambiguity between:
-  - declarative dotfiles;
-  - privileged machine provisioning;
-  - local secret-bearing state.
-- Prevented the rclone bootstrap process from attempting to invoke `sudo`
-  through the unprivileged `mxm` account.
-- Split Google Drive provisioning into:
-  - an administrative system-preparation script;
-  - an unprivileged user-service activation script.
+- Configured the Google Drive mount with user-only filesystem permissions.
+- Separated root-owned Google Drive mount preparation from user-level service operation.
+- Established the repository as open-resistant configuration:
+  knowledge of the workstation definition must not itself confer authority.
 
 ### Validated
 
-- Verified the Google Drive remote using:
-
-  ```bash
-  rclone lsd gdrive:
-  ```
-
-- Verified creation, rename and deletion of ordinary files through the mounted
-  Linux filesystem.
-- Verified propagation of Linux filesystem changes to the Google Drive web
-  interface.
-- Verified that deletions are represented through Google Drive Trash.
-- Verified the rclone mount manually before systemd automation.
-- Verified the systemd user-unit configuration.
-- Verified automatic service enablement.
-- Verified that the Google Drive mount is active at:
-
-  ```text
-  /mnt/gdrive
-  ```
-
-- Verified that the mount can be stopped and restarted through:
-
-  ```bash
-  systemctl --user
-  ```
+- Verified Google Drive access through the rclone remote.
+- Verified creation, rename and deletion of ordinary files through `/mnt/gdrive`.
+- Verified propagation of filesystem changes to Google Drive.
+- Verified user-level systemd management of the Google Drive mount.
+- Applied and exercised the chezmoi-managed configuration on the existing workstation.
 
 ### Notes
 
-- Google Drive remains the authoritative file store.
-- `/mnt/gdrive` is a Linux operational interface, not a complete local mirror.
-- Google Docs, Sheets and Slides remain browser-managed.
-- The rclone service starts when the `mxm` user session starts.
-- The Google Drive bootstrap scripts are normally run once per machine.
-- Runtime caches and generated logs are operational state rather than
-  declarative workstation configuration.
-- Historical releases have not been reconstructed from the previous changelog
-  because that file described a different project. The first formal
-  `mxm-workstation` release should be created deliberately from this
-  workstation-specific baseline.
+- Google Drive remains the authoritative store for content exposed through `/mnt/gdrive`; the mount is not a complete local mirror.
+- Google-native Docs, Sheets and Slides remain browser-managed.
+- Runtime caches, logs, credentials and Git working state are operational state rather than workstation configuration.
+- The first tagged `mxm-workstation` release will be cut from a deliberately tested public baseline.

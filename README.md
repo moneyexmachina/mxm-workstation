@@ -1,15 +1,14 @@
-Reproducible Linux workstation configuration and bootstrap framework for
-Money Ex Machina.
+# mxm-workstation
 
-`mxm-workstation` defines the canonical MXM workstation environment. It
-contains the declarative user configuration, bootstrap specifications,
-operational scripts and documentation required to reproduce and maintain that
-environment across supported machines.
+Opinionated, reproducible Linux workstation configuration for Money Ex Machina.
 
-The repository converts workstation setup from undocumented, interactive
-machine state into explicit, version-controlled and recoverable capabilities.
+`mxm-workstation` defines the user-facing workstation environment used to develop and operate MXM.
 
-## Purpose
+It turns workstation setup from undocumented machine state into explicit, version-controlled and recoverable capabilities.
+
+The repository is intentionally opinionated. It describes the environment used by MXM rather than attempting to provide a general-purpose Linux workstation framework.
+
+## Design goals
 
 An MXM workstation should be:
 
@@ -17,585 +16,456 @@ An MXM workstation should be:
 - terminal-first;
 - security-conscious;
 - operationally transparent;
-- consistent across supported machines;
+- composed from explicit capabilities;
 - straightforward to inspect, evolve and rebuild.
 
-`mxm-workstation` provides the source-controlled definition of that
-environment.
+The workstation definition is configuration rather than authority.
 
-A workstation configured from this repository implements the MXM
-**workstation contract**: the expected tools, configuration, services,
-filesystem interfaces and operating conventions required for Money Ex Machina
-development and operation.
+Knowing the contents of this repository must not grant access to MXM systems, credentials or private data.
 
-## Operating model
+## Profile model
 
-The workstation separates three kinds of state.
+Different machines require different subsets of workstation capabilities.
 
-### Declarative workstation configuration
+`mxm-workstation` therefore defines composable profiles rather than one universal workstation image.
 
-Stable user configuration is stored in this repository and deployed through
-chezmoi.
-
-This includes:
-
-- shell configuration;
-- Kitty configuration;
-- tmux configuration;
-- Neovim configuration;
-- Sway and Wayland configuration;
-- status and notification services;
-- systemd user-service definitions;
-- reproducible application configuration.
-
-### Machine-level provisioning
-
-Changes requiring elevated privileges are performed explicitly through the
-administrative account.
-
-Examples include:
-
-- installing system packages;
-- creating directories under `/mnt`;
-- changing system-level configuration;
-- enabling machine-level capabilities.
-
-These operations are deliberately separated from ordinary user configuration.
-
-### Local identity, secrets and runtime state
-
-Secret-bearing or machine-local state is not committed directly to this
-repository.
-
-Examples include:
-
-- OAuth refresh tokens;
-- rclone credentials;
-- SSH private keys;
-- application authentication tokens;
-- password-manager state;
-- runtime caches and logs.
-
-The repository defines how these facilities are configured and operated, while
-their live credentials remain local.
-
-## User and privilege model
-
-The normal workstation account is:
+Current profiles are:
 
 ```text
-mxm
+base
+desktop
+operator
+agent-development
 ```
 
-The `mxm` account is used for:
-
-- development;
-- terminal and desktop sessions;
-- chezmoi application;
-- user-level systemd services;
-- application configuration;
-- user-owned credentials and caches.
-
-Administrative work is performed through:
+Example compositions are:
 
 ```text
-adminsecure
+Forge
+    = base
+    + desktop
+    + operator
+
+mxm-factory-agent
+    = base
+    + agent-development
 ```
 
-The `adminsecure` account is used only when elevated privileges are required,
-including:
+Not every MXM appliance is a workstation, and not every workstation requires every profile.
 
-- installing packages;
-- creating root-owned filesystem structures;
-- modifying machine-level configuration;
-- performing explicitly authorised system maintenance.
-
-The normal `mxm` account does not have unrestricted `sudo` access.
-
-This creates a clear boundary between routine workstation operation and
-privileged machine administration.
+Profiles describe roles and capabilities rather than particular hostnames.
 
 ## Repository structure
 
 ```text
-bootstrap/      Bootstrap specifications and package definitions
-chezmoi/        Declarative home-directory source state
-docs/           Architecture, setup, operation and recovery documentation
-scripts/        Explicit workstation provisioning and utility scripts
+.
+├── bootstrap/
+│   └── neovim.md
+├── chezmoi/
+│   ├── .chezmoiignore
+│   ├── dot_config/
+│   │   ├── i3status/
+│   │   ├── kitty/
+│   │   ├── mako/
+│   │   ├── nvim/
+│   │   ├── sway/
+│   │   ├── systemd/user/
+│   │   ├── tmux/
+│   │   └── starship.toml
+│   ├── dot_zprofile
+│   └── dot_zshrc
+├── profiles/
+│   ├── README.md
+│   ├── base/
+│   │   └── requirements.yaml
+│   ├── desktop/
+│   ├── operator/
+│   │   ├── requirements.yaml
+│   │   └── google-drive/
+│   │       ├── README.md
+│   │       └── scripts/
+│   └── agent-development/
+│       └── requirements.yaml
+├── CHANGELOG.md
+├── LICENSE
+└── README.md
 ```
 
-The current repository structure includes:
+The exact tree evolves as capabilities are added, but the responsibility boundaries should remain stable.
 
-```text
-bootstrap/
-├── neovim.md
-└── packages.yaml
+## Responsibility model
 
-chezmoi/
-├── dot_config/
-│   ├── chezmoi/
-│   ├── i3status/
-│   ├── kitty/
-│   ├── mako/
-│   ├── nvim/
-│   ├── sway/
-│   ├── systemd/user/
-│   ├── tmux/
-│   └── starship.toml
-├── dot_zprofile
-└── dot_zshrc
+The workstation separates four distinct concerns.
 
-docs/
-└── google-drive.md
+### Workstation contract
 
-scripts/
-├── bootstrap-gdrive-mount
-└── bootstrap-gdrive-system
-```
-
-## Chezmoi source model
-
-The `chezmoi/` directory is the source state for the normal `mxm` user's home
-directory.
-
-Chezmoi naming conventions map source paths to deployed paths.
+Profile requirements describe what must exist for a machine to satisfy a workstation role.
 
 For example:
 
 ```text
-chezmoi/dot_config/kitty/kitty.conf
+profiles/base/requirements.yaml
+profiles/operator/requirements.yaml
+profiles/agent-development/requirements.yaml
 ```
 
-is deployed to:
+These files are descriptive contracts.
+
+They are not package-manager input and are not intended to become an alternative provisioning language.
+
+A machine-level provisioning system is responsible for realizing the required capabilities.
+
+For MXM cloud appliances this responsibility currently belongs to `mxm-infra`.
+
+### Declarative user configuration
+
+Stable home-directory configuration is managed through one shared chezmoi source tree:
 
 ```text
-~/.config/kitty/kitty.conf
+chezmoi/
 ```
 
-Similarly:
+This includes, where applicable:
+
+- Zsh configuration;
+- Starship;
+- tmux;
+- Neovim;
+- Kitty;
+- Sway;
+- status and notification configuration;
+- systemd user services;
+- application configuration.
+
+There is deliberately not one independent chezmoi source tree per profile.
+
+### Machine-level provisioning
+
+Operating-system and privileged machine configuration belongs outside ordinary home-directory configuration.
+
+Examples include:
+
+- installing operating-system packages;
+- installing external applications;
+- creating Unix users;
+- configuring login shells;
+- creating system-owned filesystem structures;
+- installing system services;
+- realizing appliance-specific capabilities.
+
+For MXM appliances these operations can be performed declaratively by `mxm-infra`.
+
+Local workstations may use a different realization mechanism.
+
+### Identity, secrets and runtime state
+
+Secret-bearing or transient state is not part of the public workstation configuration.
+
+Examples include:
 
 ```text
-chezmoi/dot_config/systemd/user/rclone-gdrive.service
+SSH private keys
+OAuth credentials and refresh tokens
+GitHub authentication state
+OpenBao credentials
+Tailscale provisioning credentials
+application session tokens
+~/.config/rclone/rclone.conf
+runtime caches
+logs
+Git working trees
 ```
 
-is deployed to:
+The repository may document how such facilities are used, but it must not contain their live authority.
+
+## Profile requirements
+
+### `base`
+
+`base` defines the common terminal development environment.
+
+It currently includes capabilities around:
+
+- Git;
+- shell operation;
+- Zsh;
+- tmux;
+- Neovim;
+- `ripgrep`;
+- `fd`;
+- `fzf`;
+- JSON and filesystem inspection;
+- Neovim language/tooling dependencies;
+- chezmoi;
+- Starship.
+
+Machines using other workstation profiles normally also select `base`.
+
+### `desktop`
+
+`desktop` contains configuration specific to a graphical local workstation.
+
+This includes configuration such as:
 
 ```text
-~/.config/systemd/user/rclone-gdrive.service
+Kitty
+Sway
+i3status
+Mako
 ```
 
-The shell configuration files:
+Desktop configuration is excluded from machines that do not select the `desktop` profile.
+
+### `operator`
+
+`operator` contains capabilities used from the trusted human operator workstation.
+
+Current operator functionality includes Google Drive integration through `rclone`.
+
+Google Drive documentation and bootstrap scripts live under:
 
 ```text
-chezmoi/dot_zprofile
-chezmoi/dot_zshrc
+profiles/operator/google-drive/
 ```
 
-are deployed to:
+Operator capabilities must not be assumed to belong on lower-authority MXM appliances.
+
+### `agent-development`
+
+`agent-development` defines the environment used for interactive and bounded AI-assisted software development.
+
+Current requirements include capabilities around:
+
+- GitHub CLI;
+- Poetry;
+- Droid;
+- ShellCheck;
+- remote Kitty terminal compatibility;
+- remote development tooling;
+- OSC-52 clipboard integration.
+
+The intended remote-terminal topology is:
 
 ```text
-~/.zprofile
-~/.zshrc
+Kitty on the local workstation
+        ↓
+OpenSSH
+        ↓
+tmux on the remote workstation
 ```
 
-Before applying changes, inspect the proposed deployment:
+OSC-52 allows tmux on the remote workstation to write to the clipboard owned by the local Kitty terminal.
 
-```bash
-chezmoi diff
+Pasting in the opposite direction uses ordinary terminal paste through the SSH session.
+
+Nested tmux sessions are not currently part of the workstation contract.
+
+## Profile selection
+
+The selected workstation profiles are instance-specific state.
+
+They are provided to chezmoi through its local configuration, for example:
+
+```toml
+sourceDir = "/home/mxm/mxm-workstation/chezmoi"
+
+[data]
+workstationProfiles = ["base", "agent-development"]
 ```
 
-Apply the source state with:
+A different machine might use:
 
-```bash
-chezmoi apply
+```toml
+[data]
+workstationProfiles = ["base", "desktop", "operator"]
 ```
 
-Inspect managed-state differences with:
+The repository does not hard-code profile selection based on hostname.
 
-```bash
-chezmoi status
-```
+`chezmoi/.chezmoiignore` uses the selected profiles to decide which parts of the shared source state should be materialized.
 
-The repository should remain the authority for declarative configuration.
-Managed files should normally be changed in the source tree and then deployed
-through chezmoi.
+For example, desktop configuration is not applied to a headless agent-development workstation.
 
-## Managed components
+## Chezmoi source model
 
-### Shell environment
+The `chezmoi/` directory is the authoritative source state for managed home-directory configuration.
 
-The repository manages:
-
-- Zsh startup configuration;
-- login-session configuration;
-- Starship prompt configuration;
-- terminal-oriented navigation and search behaviour;
-- integration with command-line tools such as `fzf`, `fd` and `ripgrep`.
-
-Relevant source files include:
-
-```text
-chezmoi/dot_zprofile
-chezmoi/dot_zshrc
-chezmoi/dot_config/starship.toml
-```
-
-### Terminal environment
-
-Kitty provides the primary terminal emulator.
-
-Configuration is stored under:
-
-```text
-chezmoi/dot_config/kitty/
-```
-
-The workstation also uses tmux for persistent and structured terminal
-workspaces:
+For example:
 
 ```text
 chezmoi/dot_config/tmux/tmux.conf
 ```
 
-### Editing environment
-
-Neovim provides the primary text-editing and development environment.
-
-Its configuration is stored under:
+is deployed to:
 
 ```text
-chezmoi/dot_config/nvim/
+~/.config/tmux/tmux.conf
 ```
 
-The configuration includes:
-
-- plugin management;
-- language-server integration;
-- development tooling;
-- debugging and linting support;
-- fuzzy file and content navigation;
-- MXM-specific key mappings and utilities;
-- Python virtual-environment support.
-
-Additional bootstrap guidance is stored in:
+and:
 
 ```text
-bootstrap/neovim.md
+chezmoi/dot_zshrc
 ```
 
-### Desktop environment
-
-Sway provides the primary Wayland desktop environment.
-
-Configuration is stored under:
+is deployed to:
 
 ```text
-chezmoi/dot_config/sway/
+~/.zshrc
 ```
 
-This includes:
-
-- the main Sway configuration;
-- display-output configuration;
-- session-startup commands.
-
-Related desktop components include:
-
-```text
-chezmoi/dot_config/i3status/
-chezmoi/dot_config/mako/
-```
-
-These provide status-bar and notification functionality.
-
-### User services
-
-User-level systemd units are stored under:
-
-```text
-chezmoi/dot_config/systemd/user/
-```
-
-They are deployed to:
-
-```text
-~/.config/systemd/user/
-```
-
-and controlled as `mxm` using:
-
-```bash
-systemctl --user
-```
-
-After changing a user-service definition:
-
-```bash
-chezmoi apply
-systemctl --user daemon-reload
-systemctl --user restart <service>
-```
-
-### Google Drive integration
-
-Google Drive is exposed to Linux at:
-
-```text
-/mnt/gdrive
-```
-
-The mount is provided by rclone and managed through:
-
-```text
-rclone-gdrive.service
-```
-
-The service definition is stored at:
-
-```text
-chezmoi/dot_config/systemd/user/rclone-gdrive.service
-```
-
-The integration provides Linux-first management of ordinary files while
-retaining Google Drive as the authoritative store.
-
-Google-native Docs, Sheets and Slides remain browser-managed and appear through
-the mount as browser-link files.
-
-Provisioning is divided across the privilege boundary:
-
-```text
-scripts/bootstrap-gdrive-system
-```
-
-prepares the system-owned mount point and is run through the administrative
-account.
-
-```text
-scripts/bootstrap-gdrive-mount
-```
-
-validates and enables the user-level mount and is run as `mxm`.
-
-Full setup, operation and recovery instructions are documented in:
-
-```text
-docs/google-drive.md
-```
-
-## Bootstrap model
-
-A workstation is provisioned in layers.
-
-### 1. Install a supported operating system
-
-Begin with a minimal supported Linux installation.
-
-Machine-specific requirements such as disk encryption, firmware, networking
-and hardware support are handled before applying the user configuration.
-
-### 2. Establish the account boundary
-
-Create or restore:
-
-- the normal `mxm` account;
-- the privileged `adminsecure` account;
-- the intended access and group-membership policy.
-
-### 3. Install bootstrap dependencies
-
-Install the tools required to retrieve and apply the workstation configuration.
-
-Package requirements are recorded in:
-
-```text
-bootstrap/packages.yaml
-```
-
-System package installation is performed from the administrative context.
-
-### 4. Initialise the workstation repository
-
-Clone or otherwise retrieve `mxm-workstation`.
-
-Configure chezmoi to use:
-
-```text
-mxm-workstation/chezmoi
-```
-
-as its source state.
-
-Inspect the proposed changes:
+Inspect proposed changes with:
 
 ```bash
 chezmoi diff
 ```
 
-Then apply them:
+Apply them with:
 
 ```bash
 chezmoi apply
 ```
 
-### 5. Complete privileged provisioning
-
-Run explicit administrative bootstrap operations for capabilities requiring
-system-level access.
-
-Examples include:
-
-- installing packages;
-- creating `/mnt/gdrive`;
-- enabling machine-level services;
-- configuring hardware access.
-
-These operations should not be hidden inside ordinary dotfile application.
-
-### 6. Configure local identity and secrets
-
-Create machine-local authentication state as required, including:
-
-- GitHub authentication;
-- SSH identities;
-- rclone OAuth configuration;
-- password-manager access;
-- YubiKey-backed credentials.
-
-Secret-bearing files remain outside the repository unless a separate encrypted
-secret-management mechanism is explicitly adopted.
-
-### 7. Enable user services
-
-After applying service definitions:
+Inspect remaining differences with:
 
 ```bash
-systemctl --user daemon-reload
+chezmoi status
 ```
 
-Enable an individual service with:
+Managed configuration should normally be changed in the source tree and then applied rather than edited independently in the target location.
 
-```bash
-systemctl --user enable --now <service>
-```
+## Managed terminal environment
 
-Capability-specific bootstrap scripts may perform these operations after
-validating their prerequisites.
+### Shell
 
-### 8. Verify operational capabilities
+The repository manages:
 
-A bootstrap is complete only when the resulting workstation behaviour has been
-tested.
-
-Verification should cover, as relevant:
-
-- chezmoi state;
-- expected commands;
-- terminal and editor behaviour;
-- desktop-session startup;
-- systemd user services;
-- remote access;
-- mounted filesystems;
-- authentication paths;
-- development tooling.
-
-## Current capabilities
-
-The repository currently provides or records configuration for:
-
-- reproducible chezmoi-managed home-directory state;
 - Zsh login and interactive-shell behaviour;
 - Starship prompt configuration;
-- Kitty terminal configuration;
-- tmux terminal workspace configuration;
-- Neovim development and editing configuration;
-- Sway and Wayland desktop configuration;
-- status-bar and notification services;
-- fuzzy shell history and file discovery;
-- systemd-managed user services;
-- Google Drive access through `/mnt/gdrive`;
-- explicit separation of normal and administrative identities;
-- documented capability setup and recovery procedures.
+- fuzzy command-history search;
+- terminal-oriented navigation and search tooling.
 
-The repository continues to evolve as additional workstation behaviours are
-converted from manual machine state into reproducible capabilities.
+### tmux
 
-## Design principles
+tmux provides persistent and structured terminal workspaces.
 
-### Reproducible by construction
-
-A workstation should be recoverable from a clean installation using
-version-controlled configuration and documented provisioning steps.
-
-### Declarative where possible
-
-Stable configuration belongs in source control rather than being recreated
-through interactive application interfaces.
-
-### Explicit where necessary
-
-Operations requiring elevated privileges, hardware interaction or
-authentication should be clearly documented and intentionally executed.
-
-They should not be hidden behind surprising automation.
-
-### Layered responsibility
-
-Operating-system provisioning, user configuration, local identity, secrets and
-runtime state have distinct responsibilities and authority boundaries.
-
-### Terminal-first operation
-
-The terminal is the primary operational interface.
-
-Graphical applications supplement the workflow where useful, but should not be
-the only means of controlling or understanding the system.
-
-### Least privilege
-
-Routine work is performed as `mxm` without administrative privileges.
-
-Privileged operations are isolated and deliberate.
-
-### Minimal implicit behaviour
-
-Significant workstation behaviour should be:
-
-- visible;
-- inspectable;
-- documented;
-- version-controlled where appropriate;
-- testable after deployment.
-
-### Capability-oriented development
-
-Workstation changes should deliver concrete capabilities: something the
-workstation can reliably do after the change that it could not do before.
-
-A capability is complete when it is:
-
-- implemented;
-- documented;
-- deployed;
-- operationally tested;
-- recoverable on another machine.
-
-## Secrets and runtime state
-
-Do not commit secret-bearing or transient runtime state.
-
-Examples include:
+Configuration is stored at:
 
 ```text
-~/.config/rclone/rclone.conf
-~/.cache/rclone/
-SSH private keys
-OAuth refresh tokens
-application session tokens
-runtime logs
+chezmoi/dot_config/tmux/tmux.conf
 ```
 
-Before committing workstation changes, inspect the repository:
+The configuration includes OSC-52 clipboard support suitable for direct:
+
+```text
+Kitty → SSH → tmux
+```
+
+sessions.
+
+### Neovim
+
+Neovim is the primary development editor.
+
+Configuration lives under:
+
+```text
+chezmoi/dot_config/nvim/
+```
+
+It includes support for:
+
+- language servers;
+- development tooling;
+- debugging;
+- linting;
+- Git integration;
+- fuzzy navigation;
+- Python virtual environments;
+- MXM-specific mappings and editing behaviour.
+
+Additional bootstrap notes are stored in:
+
+```text
+bootstrap/neovim.md
+```
+
+## Google Drive
+
+Google Drive is an `operator` capability.
+
+It is exposed to Linux through:
+
+```text
+/mnt/gdrive
+```
+
+using `rclone` and a systemd user service.
+
+The implementation and operating instructions live under:
+
+```text
+profiles/operator/google-drive/
+```
+
+Live Google OAuth credentials and the resulting `rclone.conf` remain machine-local and are never committed.
+
+## Realization
+
+`mxm-workstation` describes the workstation contract and contains the user configuration required to realize it.
+
+The mechanism that constructs a particular machine remains separate.
+
+For example:
+
+```text
+mxm-workstation
+    defines:
+        base + agent-development
+
+mxm-infra
+    realizes:
+        mxm-factory-agent
+```
+
+A typical disposable appliance flow is:
+
+```text
+create machine
+    ↓
+install system requirements
+    ↓
+install required external applications
+    ↓
+retrieve a pinned mxm-workstation revision
+    ↓
+provide machine-local profile selection
+    ↓
+chezmoi apply
+    ↓
+usable workstation
+```
+
+This separation avoids turning the workstation requirements into a second infrastructure provisioning system.
+
+## Security model
+
+The repository follows an open-resistant configuration model.
+
+The workstation definition may reveal:
+
+- which tools MXM uses;
+- shell and editor preferences;
+- filesystem conventions;
+- configuration structure;
+- security architecture;
+- operational patterns.
+
+Possession of that information must not grant authority.
+
+Authority-bearing state remains separate.
+
+Before committing changes, inspect the repository:
 
 ```bash
 git status --short
@@ -603,100 +473,51 @@ git diff
 git diff --cached
 ```
 
-Search for likely accidental credential material where appropriate:
+Search for likely accidental credentials where appropriate:
 
 ```bash
-git grep -nE \
-    'client_secret|refresh_token|access_token|private_key' \
-    || true
+git grep -nEi \
+  'client_secret|refresh_token|access_token|private.?key|api.?key|password' \
+  || true
 ```
 
-Documentation may legitimately mention credential field names. Actual secret
-values must not be present.
-
-Generated logs must not be stored in the chezmoi source tree. Files such as:
-
-```text
-tmux-client-*.log
-tmux-server-*.log
-```
-
-are runtime artefacts rather than workstation configuration.
+Matches in documentation may be legitimate. Actual credential values must never be committed.
 
 ## Development workflow
 
-A typical workstation change follows this sequence:
+A normal workstation change follows:
 
 ```text
 identify a missing capability
-→ implement its source configuration
-→ document its authority and operating model
-→ inspect with chezmoi diff
-→ apply with chezmoi
-→ test the deployed behaviour
-→ inspect repository changes
-→ commit the proven capability
-```
-
-Useful commands include:
-
-```bash
-git status --short
-git diff
+        ↓
+decide which profile owns it
+        ↓
+update the workstation contract
+        ↓
+implement declarative configuration
+        ↓
+realize any machine-level prerequisites
+        ↓
 chezmoi diff
+        ↓
 chezmoi apply
-chezmoi status
+        ↓
+test the capability
+        ↓
+commit the proven state
 ```
 
-For systemd user-service changes:
+Prefer deterministic mechanisms whenever a deterministic implementation exists.
 
-```bash
-systemd-analyze --user verify \
-    ~/.config/systemd/user/<service>
-
-systemctl --user daemon-reload
-systemctl --user restart <service>
-systemctl --user status <service>
-```
-
-## Documentation
-
-Capability documentation is stored under:
-
-```text
-docs/
-```
-
-Documentation should describe, where relevant:
-
-- purpose;
-- architecture;
-- authority model;
-- source and deployed paths;
-- prerequisites;
-- initial setup;
-- normal operations;
-- validation;
-- security boundaries;
-- recovery procedures.
-
-Current documentation includes:
-
-```text
-docs/google-drive.md
-```
+Agents may help design or implement workstation changes, but stable workstation behaviour should ultimately be represented by explicit configuration, scripts and tests rather than requiring an agent to reconstruct the intended state.
 
 ## Project status
 
 `mxm-workstation` is an actively evolving operational repository.
 
-Its scope expands incrementally as workstation behaviours are converted from
-manual or machine-specific state into documented and reproducible
-capabilities.
+Its scope expands as workstation behaviour is converted from machine-specific or manual state into explicit, composable and recoverable capabilities.
 
-The repository is the authority for the canonical MXM workstation
-configuration, subject to the explicit boundaries around machine provisioning,
-credentials, secrets and runtime state.
+It is currently used as the workstation contract and configuration source for MXM development environments.
 
 ## License
 
