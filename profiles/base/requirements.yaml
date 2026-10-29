@@ -2,6 +2,7 @@ ubuntu:
   - git
   - curl
   - jq
+  - pandoc
   - unzip
   - tree
   - tmux
