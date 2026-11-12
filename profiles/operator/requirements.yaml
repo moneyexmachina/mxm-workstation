@@ -2,3 +2,6 @@ packages:
   ubuntu:
     - rclone
     - ansible
+
+external:
+  - openbao-cli

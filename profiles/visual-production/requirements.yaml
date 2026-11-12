@@ -1,0 +1,26 @@
+# Visual production workstation capabilities
+#
+# Quantitative graphics, narrative diagrams,
+# presentation slides, and video production.
+
+ubuntu:
+  # Vector graphics and diagrams
+  - inkscape
+  - graphviz
+
+  # Presentation authoring
+  - libreoffice-impress
+
+  # Raster graphics
+  - gimp
+
+  # Fonts
+  - fonts-ibm-plex
+  - fonts-adobe-sourcesans3
+
+external:
+  # Publishing and reproducible presentations
+  - quarto
+
+  # Google Fonts (managed as user assets)
+  - playfair-display
