@@ -5,3 +5,4 @@ packages:
 
 external:
   - openbao-cli
+  - hcloud
