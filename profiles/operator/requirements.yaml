@@ -2,6 +2,7 @@ packages:
   ubuntu:
     - rclone
     - ansible
+    - tigervnc-viewer
 
 external:
   - openbao-cli
